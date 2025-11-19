@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kidtopia/kidtopia/resources.dart';
 import 'package:kidtopia/components/bottom_sheet_clipper.dart';
 import 'package:kidtopia/components/character_card.dart';
+import 'package:kidtopia/models/character_data.dart';
+import 'package:kidtopia/constants/character_constants.dart';
+import 'package:kidtopia/screens/event_screen.dart';
 
 class PickCharacterScreen extends StatefulWidget {
   const PickCharacterScreen({super.key});
@@ -14,14 +17,20 @@ class PickCharacterScreen extends StatefulWidget {
 class _PickCharacterScreenState extends State<PickCharacterScreen> {
   late ScrollController _scrollController;
   double _scrollOffset = 0.0;
+  int _currentCenterCardIndex = 0;
+
+  // Use character data from constants
+  final List<CharacterData> characters = availableCharacters;
 
   @override
   void initState() {
     super.initState();
+
     _scrollController = ScrollController();
     _scrollController.addListener(() {
       setState(() {
         _scrollOffset = _scrollController.offset;
+        _updateCenterCard();
       });
     });
   }
@@ -30,6 +39,21 @@ class _PickCharacterScreenState extends State<PickCharacterScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  // Update which card is currently centered
+  void _updateCenterCard() {
+    final cardWidth = 200.0;
+    final spacing = 20.0;
+    final totalCardWidth = cardWidth + spacing;
+
+    // Calculate which card is closest to center
+    final centerIndex = (_scrollOffset / totalCardWidth).round();
+    final clampedIndex = centerIndex.clamp(0, characters.length - 1);
+
+    if (_currentCenterCardIndex != clampedIndex) {
+      _currentCenterCardIndex = clampedIndex;
+    }
   }
 
   // Calculate scale and border visibility based on card position
@@ -305,38 +329,15 @@ class _PickCharacterScreenState extends State<PickCharacterScreen> {
                                       MediaQuery.of(context).size.width / 2 -
                                       100,
                                 ),
-                                _buildTransformedCard(
-                                  context: context,
-                                  cardIndex: 0,
-                                  assetPath: Assets.c3,
-                                  gradientColors: [
-                                    Colors.blueAccent,
-                                    Colors.blue.shade700,
-                                  ],
-                                  borderColor: Colors.blue,
-                                ),
-                                SizedBox(width: 20),
-                                _buildTransformedCard(
-                                  context: context,
-                                  cardIndex: 1,
-                                  assetPath: Assets.c2,
-                                  gradientColors: [
-                                    Colors.orangeAccent,
-                                    Colors.deepOrangeAccent,
-                                  ],
-                                  borderColor: Colors.orange,
-                                ),
-                                SizedBox(width: 20),
-                                _buildTransformedCard(
-                                  context: context,
-                                  cardIndex: 2,
-                                  assetPath: Assets.c5,
-                                  gradientColors: [
-                                    Colors.brown,
-                                    Colors.brown.shade700,
-                                  ],
-                                  borderColor: Colors.brown,
-                                ),
+                                for (int i = 0; i < characters.length; i++) ...[
+                                  _buildTransformedCard(
+                                    context: context,
+                                    cardIndex: i,
+                                    character: characters[i],
+                                  ),
+                                  if (i < characters.length - 1)
+                                    SizedBox(width: 20),
+                                ],
                                 SizedBox(
                                   width:
                                       MediaQuery.of(context).size.width / 2 -
@@ -348,60 +349,49 @@ class _PickCharacterScreenState extends State<PickCharacterScreen> {
 
                           SizedBox(height: 18),
 
+                          // Dynamic character name
                           Text(
-                            "Kenjiro",
+                            characters[_currentCenterCardIndex].name,
                             style: GoogleFonts.yesevaOne(
                               color: Colors.black,
                               fontSize: 30,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            "Enigmatic explorer guiding metaverse",
-                            style: GoogleFonts.yesevaOne(
-                              color: Colors.grey,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            "adventure through endless digital",
-                            style: GoogleFonts.yesevaOne(
-                              color: Colors.grey,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            "dimensions.",
-                            style: GoogleFonts.yesevaOne(
-                              color: Colors.grey,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+
+                          // Dynamic character description lines
+                          ...characters[_currentCenterCardIndex]
+                              .descriptionLines
+                              .map(
+                                (line) => Text(
+                                  line,
+                                  style: GoogleFonts.yesevaOne(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
 
                           SizedBox(height: 10),
 
+                          // Dynamic coin container with character's gradient colors
                           Container(
                             height: 50,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [
-                                  const Color.fromARGB(255, 12, 89, 196),
-                                  Colors.blue.shade700,
-                                ],
+                                colors: characters[_currentCenterCardIndex]
+                                    .gradientColors,
                               ),
                               borderRadius: BorderRadius.circular(30),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.blue.withValues(alpha: 0.5),
+                                  color: characters[_currentCenterCardIndex]
+                                      .borderColor
+                                      .withValues(alpha: 0.5),
                                   spreadRadius: 1,
                                   blurRadius: 12,
-                                  offset: Offset(
-                                    0,
-                                    4,
-                                  ), // changes position of shadow
+                                  offset: Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -424,7 +414,7 @@ class _PickCharacterScreenState extends State<PickCharacterScreen> {
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Text(
-                                      "1,240",
+                                      characters[_currentCenterCardIndex].coins,
                                       style: GoogleFonts.yesevaOne(
                                         color: Colors.white,
                                         fontSize: 14,
@@ -452,9 +442,7 @@ class _PickCharacterScreenState extends State<PickCharacterScreen> {
   Widget _buildTransformedCard({
     required BuildContext context,
     required int cardIndex,
-    required String assetPath,
-    required List<Color> gradientColors,
-    required Color borderColor,
+    required CharacterData character,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
     final transform = _getCardTransform(cardIndex, screenWidth);
@@ -463,12 +451,20 @@ class _PickCharacterScreenState extends State<PickCharacterScreen> {
 
     return Transform.scale(
       scale: scale,
-      child: CharacterCard(
-        assetPath: assetPath,
-        gradientColors: gradientColors,
-        borderColor: borderColor,
-        scale: scale,
-        borderOpacity: borderOpacity,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const EventScreen()),
+          );
+        },
+        child: CharacterCard(
+          assetPath: character.assetPath,
+          gradientColors: character.gradientColors,
+          borderColor: character.borderColor,
+          scale: scale,
+          borderOpacity: borderOpacity,
+        ),
       ),
     );
   }
