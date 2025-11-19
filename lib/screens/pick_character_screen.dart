@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kidtopia/kidtopia/resources.dart';
 import 'package:kidtopia/components/bottom_sheet_clipper.dart';
-import 'package:kidtopia/components/cone_clipper.dart';
+import 'package:kidtopia/components/character_card.dart';
 
 class PickCharacterScreen extends StatelessWidget {
   const PickCharacterScreen({super.key});
@@ -219,34 +219,50 @@ class PickCharacterScreen extends StatelessWidget {
                           ],
                         ),
 
-                        SizedBox(height: 40),
+                        SizedBox(height: 120),
 
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ClipPath(
-                              clipper: ConeClipper(),
-                              child: Container(
-                                width: 200,
-                                height: 240,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.orangeAccent,
-                                      Colors.deepOrangeAccent,
-                                    ],
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                  ),
-                                  borderRadius: BorderRadius.circular(30),
-                                  border: Border.all(
-                                    color: Colors.orange,
-                                    width: 4,
-                                  ),
-                                ),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          clipBehavior: Clip.none,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width / 2 - 100,
                               ),
-                            ),
-                          ],
+                              CharacterCard(
+                                assetPath: Assets.c3,
+                                gradientColors: [
+                                  Colors.blueAccent,
+                                  Colors.blue.shade700,
+                                ],
+                                borderColor: Colors.blue,
+                              ),
+                              SizedBox(width: 20),
+                              CharacterCard(
+                                assetPath: Assets.c2,
+                                gradientColors: [
+                                  Colors.orangeAccent,
+                                  Colors.deepOrangeAccent,
+                                ],
+                                borderColor: Colors.orange,
+                              ),
+                              SizedBox(width: 20),
+                              CharacterCard(
+                                assetPath: Assets.c5,
+                                gradientColors: [
+                                  Colors.brown,
+                                  Colors.brown.shade700,
+                                ],
+                                borderColor: Colors.brown,
+                              ),
+                              SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.width / 2 - 100,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
